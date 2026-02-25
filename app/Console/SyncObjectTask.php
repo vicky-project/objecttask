@@ -2,6 +2,7 @@
 namespace Modules\ObjectTask\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Modules\ObjectTask\Models\ObjectCategory;
 use Modules\ObjectTask\Models\ObjectContent;
 use Modules\ObjectTask\Models\TaskCode;
@@ -43,8 +44,10 @@ class SyncObjectTask extends Command
 
 	private function syncObjects($data)
 	{
+		DB::statement("SET FOREIGN_KEY_CHECKS=0");
 		ObjectContent::truncate();
 		ObjectCategory::truncate();
+		DB::statement("SET FOREIGN_KEY_CHECKS=1");
 		foreach ($data as $category) {
 			$cat = ObjectCategory::create([
 				"code" => $category["code"],
