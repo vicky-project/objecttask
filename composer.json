@@ -1,30 +1,36 @@
 {
-    "name": "nwidart/objecttask",
-    "description": "",
-    "authors": [
-        {
-            "name": "Nicolas Widart",
-            "email": "n.widart@gmail.com"
-        }
-    ],
-    "extra": {
-        "laravel": {
-            "providers": [],
-            "aliases": {
-
-            }
-        }
-    },
-    "autoload": {
-        "psr-4": {
-            "Modules\\ObjectTask\\": "app/",
-            "Modules\\ObjectTask\\Database\\Factories\\": "database/factories/",
-            "Modules\\ObjectTask\\Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Modules\\ObjectTask\\Tests\\": "tests/"
-        }
-    }
+	"name": "vicky-project/objecttask-module",
+	"type": "laravel-module",
+	"description": "Just for internal usage.",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Vicky Rahman",
+			"email": "pratamavr@gmail.com"
+		}
+	],
+	"extra": {
+		"laravel": {
+			"providers": [],
+			"aliases": {}
+		}
+	},
+	"require": {
+		"php": "^8.2",
+		"joshbrw/laravel-module-installer": "^1.0",
+		"vicky-project/core-module": "^1.0",
+		"vicky-project/telegram-module": "^1.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Modules\\ObjectTask\\": "app/",
+			"Modules\\ObjectTask\\Database\\Factories\\": "database/factories/",
+			"Modules\\ObjectTask\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Modules\\ObjectTask\\Tests\\": "tests/"
+		}
+	}
 }
