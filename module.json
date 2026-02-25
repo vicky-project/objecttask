@@ -1,0 +1,11 @@
+{
+    "name": "ObjectTask",
+    "alias": "objecttask",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ObjectTask\\Providers\\ObjectTaskServiceProvider"
+    ],
+    "files": []
+}

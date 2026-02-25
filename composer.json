@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/objecttask",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ObjectTask\\": "app/",
+            "Modules\\ObjectTask\\Database\\Factories\\": "database/factories/",
+            "Modules\\ObjectTask\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ObjectTask\\Tests\\": "tests/"
+        }
+    }
+}
