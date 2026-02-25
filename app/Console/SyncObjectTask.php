@@ -43,6 +43,7 @@ class SyncObjectTask extends Command
 
 	private function syncObjects($data)
 	{
+		ObjectContent::truncate();
 		ObjectCategory::truncate();
 		foreach ($data as $category) {
 			$cat = ObjectCategory::create([
