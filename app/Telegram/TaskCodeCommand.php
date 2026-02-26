@@ -31,12 +31,12 @@ class TaskCodeCommand extends BaseCommandHandler
     array $params = [],
   ): array {
     $taskCode = TaskCode::all();
-    $messages = "Task Code:\n\n";
+    $messages = "*Task Code*:\n\n";
     foreach ($taskCode as $task) {
       $messages .= "● `{$task->code}` - {$task->description}\n";
     }
 
-    $messages .= "\n\nnote: _Tekan pada kode untuk menyalin._";
+    $messages .= "\n\nnote: _Tekan pada kode untuk menyalin_";
 
     return ['status' => 'taskcode_sent',
       'send_message' => ['text' => $messages,
