@@ -43,7 +43,7 @@ class TaskCodeCommand extends BaseCommandHandler
 			$messages .= "● `{$task->code}` - {$task->description}\n";
 		}
 
-		$messages .= "\n\nnote: __tekan kode untuk menyalin__";
+		$messages .= "\n\nnote: _tekan kode untuk menyalin_";
 
 		return [
 			"status" => "taskcode_sent",

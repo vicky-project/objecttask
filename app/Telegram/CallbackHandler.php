@@ -82,7 +82,7 @@ class CallbackHandler extends BaseCallbackHandler
 					$message .= "● `{$content->code}` - {$content->description}\n";
 				}
 
-				$message .= "\n\nnote: __tekan kode untuk menyalin__";
+				$message .= "\n\nnote: _tekan kode untuk menyalin_";
 
 				return [
 					"success" => true,
