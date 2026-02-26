@@ -79,7 +79,7 @@ class CallbackHandler extends BaseCallbackHandler
 				$message = "*{$contents["name"]}*\n\n";
 
 				foreach ($contents["contents"] as $content) {
-					$message .= "● `{$content->code}` - {$content->description}";
+					$message .= "● `{$content->code}` - {$content->description}\n";
 				}
 
 				return [

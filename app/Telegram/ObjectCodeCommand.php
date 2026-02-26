@@ -89,6 +89,6 @@ class ObjectCodeCommand extends BaseCommandHandler
 			})
 			->toArray();
 
-		return $this->inlineKeyboard->grid($items, 4);
+		return $this->inlineKeyboard->grid($items, 2);
 	}
 }
