@@ -7,9 +7,14 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Modules\ObjectTask\Telegram\CallbackHandler;
 use Modules\ObjectTask\Telegram\ObjectCodeCommand;
 use Modules\ObjectTask\Telegram\TaskCodeCommand;
+use Modules\ObjectTask\Services\ObjectCodeService;
+use Modules\ObjectTask\Services\TaskCodeService;
 use Modules\Telegram\Services\Handlers\CommandDispatcher;
+use Modules\Telegram\Services\Handlers\CallbackHandler as TelegramCallbackHandler;
+use Modules\Telegram\Services\Support\InlineKeyboardBuilder;
 use Modules\Telegram\Services\Support\TelegramApi;
 
 class ObjectTaskServiceProvider extends ServiceProvider
@@ -36,11 +41,15 @@ class ObjectTaskServiceProvider extends ServiceProvider
 			$dispatcher = $this->app->make(CommandDispatcher::class);
 
 			$this->registerTelegramCommands($dispatcher);
-			$this->registerTelegramMiddlewares($dispatcher);
 		} else {
 			\Log::warning(
 				"Telegram CommandDispatcher not bound. Skipping command registration.",
 			);
+		}
+
+		if ($this->app->bound(TelegramCallbackHandler::class)) {
+			$callback = $this->app->make(TelegramCallbackHandler::class);
+			$this->registerCallbackHandlers($callback);
 		}
 	}
 
@@ -57,17 +66,29 @@ class ObjectTaskServiceProvider extends ServiceProvider
 		CommandDispatcher $dispatcher,
 	): void {
 		$dispatcher->registerCommand(
-			new ObjectCodeCommand($this->app->make(TelegramApi::class)),
+			new ObjectCodeCommand(
+				$this->app->make(TelegramApi::class),
+				$this->app->make(ObjectCodeService::class),
+				$this->app->make(InlineKeyboardBuilder::class),
+			),
 		);
 		$dispatcher->registerCommand(
-			new TaskCodeCommand($this->app->make(TelegramApi::class)),
+			new TaskCodeCommand(
+				$this->app->make(TelegramApi::class),
+				$this->app->make(TaskCodeService::class),
+			),
 		);
 	}
 
-	protected function registerTelegramMiddlewares(
-		CommandDispatcher $dispatcher,
+	protected function registerCallbackHandlers(
+		TelegramCallbackHandler $callback,
 	): void {
-		// $dispatcher->registerMiddleware();
+		$callback->registerHandler(
+			new CallbackHandler(
+				$this->app->make(TelegramApi::class),
+				$this->app->make(ObjectCodeService::class),
+			),
+		);
 	}
 
 	/**
