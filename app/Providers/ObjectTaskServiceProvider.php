@@ -51,6 +51,13 @@ class ObjectTaskServiceProvider extends ServiceProvider
 			$callback = $this->app->make(TelegramCallbackHandler::class);
 			$this->registerCallbackHandlers($callback);
 		}
+
+		if (
+			config($this->nameLower . ".hook.enabled", false) &&
+			class_exists($class = config($this->nameLower . ".hook.service"))
+		) {
+			$this->registerHooks($class);
+		}
 	}
 
 	/**
@@ -88,6 +95,17 @@ class ObjectTaskServiceProvider extends ServiceProvider
 				$this->app->make(TelegramApi::class),
 				$this->app->make(ObjectCodeService::class),
 			),
+		);
+	}
+
+	protected function registerHooks($hookService): void
+	{
+		$hookService::add(
+			config($this->nameLower . "hook.name"),
+			function ($data) {
+				return view($this->nameLower . "::hooks.app")->render();
+			},
+			20,
 		);
 	}
 

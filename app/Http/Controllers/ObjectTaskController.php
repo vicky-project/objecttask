@@ -2,55 +2,69 @@
 
 namespace Modules\ObjectTask\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Modules\ObjectTask\Services\ObjectCodeService;
+use Modules\ObjectTask\Services\TaskCodeService;
 
 class ObjectTaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('objecttask::index');
-    }
+	public function __construct(
+		protected TaskCodeService $taskCode,
+		protected ObjectCodeService $objectCodes,
+	) {
+	}
+	/**
+	 * Display a listing of the resource.
+	 */
+	public function index()
+	{
+		return view("objecttask::index");
+	}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('objecttask::create');
-    }
+	/**
+	 * Show the form for creating a new resource.
+	 */
+	public function taskCodes()
+	{
+		return response()->json($this->taskCodes->getTaskCodes());
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
+	/**
+	 * Store a newly created resource in storage.
+	 */
+	public function categories()
+	{
+		return response()->json($this->objectCodes->getObjectCodes());
+	}
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('objecttask::show');
-    }
+	/**
+	 * Show the specified resource.
+	 */
+	public function contents($id)
+	{
+		return response()->json($this->objectCodes->getContentById($id));
+	}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('objecttask::edit');
-    }
+	/**
+	 * Show the form for editing the specified resource.
+	 */
+	public function edit($id)
+	{
+		return view("objecttask::edit");
+	}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+	/**
+	 * Update the specified resource in storage.
+	 */
+	public function update(Request $request, $id)
+	{
+	}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+	/**
+	 * Remove the specified resource from storage.
+	 */
+	public function destroy($id)
+	{
+	}
 }
