@@ -33,11 +33,12 @@ class TaskCodeCommand extends BaseCommandHandler
     $taskCode = TaskCode::all();
     $messages = "Task Code:\n\n";
     foreach ($taskCode as $task) {
-      $messages .= "● {$task->code} - {$task->description}\n";
+      $messages .= "● `{$task->code}` - {$task->description}\n";
     }
 
     return ['status' => 'taskcode_sent',
-      'send_message' => ['text' => $messages]];
+      'send_message' => ['text' => $messages,
+        'parse_mode' => 'MarkdownV2']];
     try {} catch (\Exception $e) {
       Log::error("Failed to get task code list", [
         "message" => $e->getMessage(),
