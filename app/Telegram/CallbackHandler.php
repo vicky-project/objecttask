@@ -82,6 +82,8 @@ class CallbackHandler extends BaseCallbackHandler
 					$message .= "● `{$content->code}` - {$content->description}\n";
 				}
 
+				$message .= "\n\nnote: __tekan kode untuk menyalin__";
+
 				return [
 					"success" => true,
 					"status" => "show_object_content",
