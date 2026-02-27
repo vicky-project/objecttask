@@ -340,7 +340,7 @@
     background: none;
     border: none;
     color: var(--tg-theme-button-color, #40a7e3);
-    font-size: 1.5rem:
+    font-size: 2.5rem:
     cursor: pointer;
     padding: 0;
     line-height: 1;
