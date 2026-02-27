@@ -6,7 +6,10 @@
 <div class="main-container">
   <div class="container-custom">
     <div class="page-header">
-      <h2>Data Catalog</h2>
+      <button type="button" class="home-button" onclick="goHome();" title="Kembali ke Beranda">
+        <i class="bi bi-house-door"></i>
+      </button>
+      <h2>Object & Task Code</h2>
     </div>
 
     <!-- Nav tabs -->
@@ -216,8 +219,9 @@
     });
   }
 
-  // Override goBack jika diperlukan, tetapi tidak ada di layout, jadi kita tidak perlu.
-  // Kita hanya menggunakan tombol "Kembali ke Kategori" internal.
+  function goHome() {
+    window.location.href = "{{ route('cores.dashboard') }}?initData" + encodeURIComponent(tg.initData);
+  }
 </script>
 @endpush
 
@@ -331,6 +335,19 @@
     font-weight: 600;
     margin: 0;
     color: var(--tg-theme-text-color, #000);
+    }
+    .home-button {
+    background: none;
+    border: none;
+    color: var(--tg-theme-button-color, #40a7e3);
+    font-size: 1.5rem:
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: opacity 0.2s;
+    }
+    .home-button:hover {
+    opacity: 0.8;
     }
     #back-to-categories {
     display: none;
