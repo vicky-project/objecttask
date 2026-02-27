@@ -73,7 +73,7 @@
   renderCategories(categories);
   renderTasks(tasks);
   }).catch(error => {
-  showToast('Gagal memuat data', 'danger');
+  showToast('Gagal memuat data: ' + error.message, 'danger');
   });
 
   // ================== OBJECTS ==================
