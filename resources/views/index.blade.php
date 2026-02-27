@@ -139,7 +139,7 @@
     renderContents(data);
     })
     .catch(error => {
-    showToast('Gagal memuat konten', 'danger');
+    showToast('Gagal memuat konten: ' + error.message, 'danger');
     });
   }
 

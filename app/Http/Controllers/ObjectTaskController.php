@@ -43,7 +43,7 @@ class ObjectTaskController extends Controller
 	 */
 	public function contents($id)
 	{
-		return response()->json($this->objectCodes->getContentById($id));
+		return response()->json($this->objectCodes->getContentById($id)->contents);
 	}
 
 	/**
