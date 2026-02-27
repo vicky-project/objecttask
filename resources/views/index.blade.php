@@ -58,10 +58,27 @@
 
 @push('scripts')
 <script>
+  function showLoading(containerId, message = 'Memuat data...') {
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.innerHTML = `
+      <div class="loading-container">
+      <div class="spinner-border loading-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+      </div>
+      <div>${message}</div>
+      </div>
+      `;
+    }
+  }
+
   // Data
   let categories = [];
   let tasks = [];
   let currentCategory = null;
+
+  showLoading('categories-container', 'Memuat object codes...');
+  showLoading('tasks-container', 'Memuat task codes...');
 
   // Inisialisasi: fetch data
   Promise.all([
@@ -85,6 +102,8 @@
   renderCategories(categories);
   renderTasks(tasks);
   }).catch(error => {
+  document.getElementById('categories-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat object codes</div>';
+  document.getElementById('tasks-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat task codes</div>';
   showToast('Gagal memuat data: ' + error.message, 'danger');
   });
 
@@ -129,6 +148,8 @@
     document.getElementById('back-to-categories').style.display = 'block';
     document.getElementById('contents-container').style.display = 'block';
 
+    showLoading('contents-container', 'Memuat contents...');
+
     fetch(`{{ secure_url(config("app.url")) }}/api/data-object/categories/${id}/contents`, {
       headers: {
         'Content-Type': 'application/json',
@@ -140,6 +161,7 @@
     renderContents(data);
     })
     .catch(error => {
+    document.getElementById('contents-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat contents</div>';
     showToast('Gagal memuat konten: ' + error.message, 'danger');
     });
   }
@@ -375,6 +397,20 @@
     max-width: 500px;
     margin: 0 auto;
     padding: 1rem;
+    }
+    .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--tg-theme-hint-color, #999);
+    }
+    .loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    color: var(--tg-theme-button-color, #40a7e3);
     }
     </style>
     @endpush
