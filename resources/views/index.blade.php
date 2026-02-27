@@ -63,8 +63,8 @@
 
   // Inisialisasi: fetch data
   Promise.all([
-  fetch('/api/data-object/categories').then(res => res.json()),
-  fetch('/api/data-object/task-codes').then(res => res.json())
+  fetch('{{ secure_url("api/data-object/categories") }}').then(res => res.json()),
+  fetch('{{ secure_url("api/data-object/task-codes") }}').then(res => res.json())
   ]).then(([cats, tsk]) => {
   categories = cats;
   tasks = tsk;
@@ -117,7 +117,7 @@
     document.getElementById('back-to-categories').style.display = 'block';
     document.getElementById('contents-container').style.display = 'block';
 
-    fetch(`/api/data-object/categories/${id}/contents`)
+    fetch(`{{ secure_url("api/data-object/categories") }}/${id}/contents`)
     .then(response => response.json())
     .then(data => {
     renderContents(data);
