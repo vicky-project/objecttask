@@ -7,7 +7,7 @@
   <div class="container-custom">
     <div class="page-header">
       <a href="{{ config('app.url') }}" class="home-button" title="Kembali ke Beranda">
-        <i class="bi bi-house-door"></i>
+        <i class="bi bi-house-door fs-1"></i>
       </a>
       <h2>Object & Task Code</h2>
     </div>
@@ -240,10 +240,6 @@
     showToast('Gagal menyalin', 'danger');
     });
   }
-
-  function goHome() {
-    window.location.href = "{{ route('cores.dashboard') }}?initData" + encodeURIComponent(tg.initData);
-  }
 </script>
 @endpush
 
@@ -362,14 +358,19 @@
     background: none;
     border: none;
     color: var(--tg-theme-button-color, #40a7e3);
-    font-size: 2.5rem:
     cursor: pointer;
     padding: 0;
     line-height: 1;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
     .home-button:hover {
     opacity: 0.8;
+    }
+    .home-button i {
+    font-size: 2.5rem;
     }
     #back-to-categories {
     display: none;
