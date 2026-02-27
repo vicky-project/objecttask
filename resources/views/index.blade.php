@@ -66,15 +66,13 @@
   fetch('{{ secure_url(config("app.url")) }}/api/data-object/categories', {
   headers: {
   'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'X-CSRF-TOKEN': '{{ csrf_token() }}'
+  'Accept': 'application/json'
   }
   }).then(res => res.json()),
   fetch('{{ secure_url(config("app.url")) }}/api/data-object/task-codes',{
   headers: {
   'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'X-CSRF-TOKEN': '{{ csrf_token() }}'
+  'Accept': 'application/json'
   }
   }).then(res => res.json())
   ]).then(([cats, tsk]) => {
@@ -129,7 +127,12 @@
     document.getElementById('back-to-categories').style.display = 'block';
     document.getElementById('contents-container').style.display = 'block';
 
-    fetch(`{{ secure_url("api/data-object/categories") }}/${id}/contents`)
+    fetch(`{{ secure_url(confi("app.url")) }}/api/data-object/categories/${id}/contents`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
     .then(response => response.json())
     .then(data => {
     renderContents(data);
