@@ -6,9 +6,9 @@
 <div class="main-container">
   <div class="container-custom">
     <div class="page-header">
-      <button type="button" class="home-button" onclick="goHome();" title="Kembali ke Beranda">
+      <a href="/" class="home-button" title="Kembali ke Beranda">
         <i class="bi bi-house-door"></i>
-      </button>
+      </a>
       <h2>Object & Task Code</h2>
     </div>
 
