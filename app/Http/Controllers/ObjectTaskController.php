@@ -10,7 +10,7 @@ use Modules\ObjectTask\Services\TaskCodeService;
 class ObjectTaskController extends Controller
 {
 	public function __construct(
-		protected TaskCodeService $taskCode,
+		protected TaskCodeService $taskCodes,
 		protected ObjectCodeService $objectCodes,
 	) {
 	}
