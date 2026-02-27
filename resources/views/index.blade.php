@@ -66,14 +66,14 @@
   fetch('{{ secure_url(config("app.url")) }}/api/data-object/categories', {
   headers: {
   'Content-Type': 'application/json',
-  'Accept': 'application/json';
+  'Accept': 'application/json',
   'X-CSRF-TOKEN': '{{ csrf_token() }}'
   }
   }).then(res => res.json()),
   fetch('{{ secure_url(config("app.url")) }}/api/data-object/task-codes',{
   headers: {
   'Content-Type': 'application/json',
-  'Accept': 'application/json';
+  'Accept': 'application/json',
   'X-CSRF-TOKEN': '{{ csrf_token() }}'
   }
   }).then(res => res.json())
