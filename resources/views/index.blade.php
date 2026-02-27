@@ -2,50 +2,53 @@
 
 @section('title', 'Data Catalog')
 
+
 @section('content')
-<div class="container-custom">
-  <div class="page-header">
-    <h2>Data Catalog</h2>
-  </div>
-
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs" id="dataTab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="objects-tab" data-bs-toggle="tab" data-bs-target="#objects" type="button" role="tab" aria-controls="objects" aria-selected="true">
-        <i class="bi bi-grid"></i> Objects
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false">
-        <i class="bi bi-check2-square"></i> Task Codes
-      </button>
-    </li>
-  </ul>
-
-  <!-- Tab panes -->
-  <div class="tab-content" id="dataTabContent">
-    <!-- Objects Tab -->
-    <div class="tab-pane fade show active" id="objects" role="tabpanel" aria-labelledby="objects-tab">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="badge bg-primary" id="object-count-badge">0</span>
-        <input type="text" class="search-box" id="object-search" placeholder="Cari kategori...">
-      </div>
-
-      <div id="back-to-categories" onclick="showCategories()">
-        <i class="bi bi-arrow-left"></i> Kembali ke Kategori
-      </div>
-
-      <div id="categories-container"></div>
-      <div id="contents-container" style="display: none;"></div>
+<div class="main-container">
+  <div class="container-custom">
+    <div class="page-header">
+      <h2>Data Catalog</h2>
     </div>
 
-    <!-- Tasks Tab -->
-    <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="badge bg-primary" id="task-count-badge">0</span>
-        <input type="text" class="search-box" id="task-search" placeholder="Cari kode atau deskripsi...">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="dataTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="objects-tab" data-bs-toggle="tab" data-bs-target="#objects" type="button" role="tab" aria-controls="objects" aria-selected="true">
+          <i class="bi bi-grid"></i> Objects
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false">
+          <i class="bi bi-check2-square"></i> Task Codes
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="dataTabContent">
+      <!-- Objects Tab -->
+      <div class="tab-pane fade show active" id="objects" role="tabpanel" aria-labelledby="objects-tab">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="badge bg-primary" id="object-count-badge">0</span>
+          <input type="text" class="search-box" id="object-search" placeholder="Cari kategori...">
+        </div>
+
+        <div id="back-to-categories" onclick="showCategories()">
+          <i class="bi bi-arrow-left"></i> Kembali ke Kategori
+        </div>
+
+        <div id="categories-container"></div>
+        <div id="contents-container" style="display: none;"></div>
       </div>
-      <div id="tasks-container"></div>
+
+      <!-- Tasks Tab -->
+      <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="badge bg-primary" id="task-count-badge">0</span>
+          <input type="text" class="search-box" id="task-search" placeholder="Cari kode atau deskripsi...">
+        </div>
+        <div id="tasks-container"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -53,9 +56,6 @@
 
 @push('scripts')
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
-
   // Data
   let categories = [];
   let tasks = [];
@@ -202,82 +202,31 @@
     });
   }
 
-  // ================== OVERRIDE GO BACK ==================
-  window.goBack = function() {
-    // Jika di tab objects dan sedang di dalam konten
-    const objectsTab = document.getElementById('objects');
-    if (objectsTab.classList.contains('show') && document.getElementById('contents-container').style.display === 'block') {
-      showCategories();
-    } else {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "{{ route('cores.dashboard') }}?initData=" + encodeURIComponent(tg.initData);
-      }
-    }
-  };
-
-  // ================== TOAST ==================
-  function showToast(message, type = 'success') {
-    let toastContainer = document.querySelector('.toast-container');
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-      document.body.appendChild(toastContainer);
-
-      const toastEl = document.createElement('div');
-      toastEl.id = 'liveToast';
-      toastEl.className = 'toast';
-      toastEl.setAttribute('role', 'alert');
-      toastEl.setAttribute('aria-live', 'assertive');
-      toastEl.setAttribute('aria-atomic', 'true');
-      toastEl.innerHTML = `
-      <div class="toast-header">
-      <strong class="me-auto">Notifikasi</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body"></div>
-      `;
-      toastContainer.appendChild(toastEl);
-    }
-
-    const toastEl = document.getElementById('liveToast');
-    const toastBody = toastEl.querySelector('.toast-body');
-    toastBody.textContent = message;
-
-    toastEl.classList.remove('bg-success', 'bg-danger', 'text-white', 'bg-info');
-    if (type === 'success') {
-      toastEl.classList.add('bg-success', 'text-white');
-    } else if (type === 'danger') {
-      toastEl.classList.add('bg-danger', 'text-white');
-    } else {
-      toastEl.classList.add('bg-info', 'text-white');
-    }
-
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
-  }
-
-  // Flash message dari session jika ada
-  @if(session()->has('success'))
-  showToast('{{ session()->get('success') }}');
-  @endif
-  @if($errors->any())
-  const errors = @json($errors->all());
-  errors.forEach(error => {
-  showToast(error, 'danger');
-  });
-  @endif
-
-  tg.ready();
+  // Override goBack jika diperlukan, tetapi tidak ada di layout, jadi kita tidak perlu.
+  // Kita hanya menggunakan tombol "Kembali ke Kategori" internal.
 </script>
 @endpush
 
 @push('styles')
 <style>
-  /* Gaya umum */
-  .category-item {
-    background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+  /* Gaya tambahan untuk tab dan elemen lainnya */
+  .nav-tabs {
+    border-bottom: 1px solid var(--tg-theme-hint-color, #e9ecef);
+    margin-bottom: 20px;
+    }
+    .nav-tabs .nav-link {
+    color: var(--tg-theme-hint-color, #999);
+    border: none;
+    font-weight: 500;
+    background-color: transparent;
+    }
+    .nav-tabs .nav-link.active {
+    color: var(--tg-theme-button-color, #40a7e3);
+    background-color: transparent;
+    border-bottom: 2px solid var(--tg-theme-button-color, #40a7e3);
+    }
+    .category-item {
+    background-color: var(--tg-theme-bg-color, #fff);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 10px;
@@ -286,6 +235,7 @@
     justify-content: space-between;
     align-items: center;
     transition: transform 0.1s ease;
+    border: 1px solid var(--tg-theme-hint-color, #ddd);
     }
     .category-item:active {
     transform: scale(0.98);
@@ -299,16 +249,17 @@
     color: var(--tg-theme-hint-color, #999);
     }
     .content-item {
-    background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    background-color: var(--tg-theme-bg-color, #fff);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 6px;
     border-left: 4px solid var(--tg-theme-button-color, #40a7e3);
     cursor: pointer;
     transition: background-color 0.2s;
+    border: 1px solid var(--tg-theme-hint-color, #ddd);
     }
     .content-item:active {
-    background-color: rgba(64, 167, 227, 0.1);
+    background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
     }
     .content-item .content-code {
     font-weight: 600;
@@ -318,7 +269,7 @@
     color: var(--tg-theme-text-color, #000);
     }
     .task-item {
-    background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    background-color: var(--tg-theme-bg-color, #fff);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 10px;
@@ -327,9 +278,10 @@
     align-items: center;
     cursor: pointer;
     transition: background-color 0.2s;
+    border: 1px solid var(--tg-theme-hint-color, #ddd);
     }
     .task-item:active {
-    background-color: rgba(64, 167, 227, 0.1);
+    background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
     }
     .task-code {
     font-weight: 600;
@@ -344,13 +296,12 @@
     font-weight: 500;
     }
     .search-box {
-    background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
-    border: none;
+    background-color: var(--tg-theme-bg-color, #fff);
+    border: 1px solid var(--tg-theme-hint-color, #ddd);
     border-radius: 20px;
     padding: 10px 15px;
     color: var(--tg-theme-text-color, #000);
     width: 100%;
-    margin-bottom: 20px;
     }
     .search-box::placeholder {
     color: var(--tg-theme-hint-color, #999);
@@ -371,32 +322,28 @@
     display: none;
     margin-bottom: 20px;
     cursor: pointer;
-    color: var(--tg-theme-link-color, #40a7e3);
+    color: var(--tg-theme-button-color, #40a7e3);
     font-weight: 500;
     }
     #back-to-categories i {
     font-size: 1.2rem;
     margin-right: 5px;
     }
-    .nav-tabs {
-    border-bottom: 1px solid var(--tg-theme-section-separator-color, #e9ecef);
-    margin-bottom: 20px;
-    }
-    .nav-tabs .nav-link {
-    color: var(--tg-theme-hint-color, #999);
-    border: none;
-    font-weight: 500;
-    }
-    .nav-tabs .nav-link.active {
-    color: var(--tg-theme-button-color, #40a7e3);
-    background-color: transparent;
-    border-bottom: 2px solid var(--tg-theme-button-color, #40a7e3);
+    .badge.bg-primary {
+    background-color: var(--tg-theme-button-color, #40a7e3) !important;
+    color: var(--tg-theme-button-text-color, #fff) !important;
     }
     .tab-pane {
     padding: 0;
     }
-    .toast-container {
-    z-index: 1050;
+    .main-container {
+    background-color: var(--tg-theme-bg-color, #fff);
+    min-height: 100vh;
+    }
+    .container-custom {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
     }
     </style>
     @endpush
