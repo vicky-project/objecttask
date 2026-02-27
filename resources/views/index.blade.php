@@ -127,7 +127,7 @@
     document.getElementById('back-to-categories').style.display = 'block';
     document.getElementById('contents-container').style.display = 'block';
 
-    fetch(`{{ secure_url(confi("app.url")) }}/api/data-object/categories/${id}/contents`, {
+    fetch(`{{ secure_url(config("app.url")) }}/api/data-object/categories/${id}/contents`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
