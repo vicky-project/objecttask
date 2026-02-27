@@ -63,7 +63,12 @@
 
   // Inisialisasi: fetch data
   Promise.all([
-  fetch('{{ secure_url("api/data-object/categories") }}').then(res => res.json()),
+  fetch('{{ secure_url("api/data-object/categories") }}', {
+  headers: {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+  }
+  }).then(res => res.json()),
   fetch('{{ secure_url("api/data-object/task-codes") }}').then(res => res.json())
   ]).then(([cats, tsk]) => {
   categories = cats;
