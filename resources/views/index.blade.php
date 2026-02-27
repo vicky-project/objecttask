@@ -1,4 +1,4 @@
-@extends('core::layouts.app')
+@extends('core::layouts.main')
 
 @section('title', 'Data Catalog')
 
