@@ -6,7 +6,7 @@
 <div class="main-container">
   <div class="container-custom">
     <div class="page-header">
-      <a href="/" class="home-button" title="Kembali ke Beranda">
+      <a href="{{ config('app.url') }}" class="home-button" title="Kembali ke Beranda">
         <i class="bi bi-house-door"></i>
       </a>
       <h2>Object & Task Code</h2>
