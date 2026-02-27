@@ -2,7 +2,6 @@
 
 @section('title', 'Data Catalog')
 
-
 @section('content')
 <div class="main-container">
   <div class="container-custom">
