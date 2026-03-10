@@ -6,7 +6,7 @@ return [
   "task_url" => env("TASK_CODE_URL"),
   "hook" => [
     "enabled" => env("OBJECT_TASK_HOOK_ENABLED", true),
-    "service" => \Modules\Core\Services\HookService::class,
+    "service" => \Modules\CoreUI\Services\UIService::class,
     "name" => "main-apps",
   ],
 ];

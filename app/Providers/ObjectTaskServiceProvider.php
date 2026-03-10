@@ -103,10 +103,7 @@ class ObjectTaskServiceProvider extends ServiceProvider
   {
     $hookService::add(
       config($this->nameLower . ".hook.name"),
-      function ($data) {
-        return view($this->nameLower . "::hooks.app")->render();
-      },
-      20,
+      $this->nameLower."::hooks.app"
     );
   }
 
