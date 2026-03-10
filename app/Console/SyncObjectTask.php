@@ -2,10 +2,7 @@
 namespace Modules\ObjectTask\Console;
 
 use Illuminate\Console\Command;
-<<<<<<< HEAD
-=======
 use Illuminate\Support\Facades\DB;
->>>>>>> 7e8d77d (updates)
 use Modules\ObjectTask\Models\ObjectCategory;
 use Modules\ObjectTask\Models\ObjectContent;
 use Modules\ObjectTask\Models\TaskCode;
@@ -13,48 +10,43 @@ use Illuminate\Support\Facades\Http;
 
 class SyncObjectTask extends Command
 {
-	protected $signature = "app:object-sync";
-	protected $description = "Sync data object and task code from external URL";
+  protected $signature = "app:object-sync";
+  protected $description = "Sync data object and task code from external URL";
 
-	public function handle()
-	{
-		$objectUrl = config("objecttask.object_url");
-		$taskUrl = config("objecttask.task_url");
+  public function handle() {
+    $objectUrl = config("objecttask.object_url");
+    $taskUrl = config("objecttask.task_url");
 
-		if (!$objectUrl || !$taskUrl) {
-			$this->error("URLs not configured.");
-			return;
-		}
+    if (!$objectUrl || !$taskUrl) {
+      $this->error("URLs not configured.");
+      return;
+    }
 
-		$this->info("Fetching object data...");
-		$objectResponse = Http::get($objectUrl);
-		if ($objectResponse->successful()) {
-			$this->syncObjects($objectResponse->json());
-		} else {
-			$this->error("Failed to fetch object data.");
-		}
+    $this->info("Fetching object data...");
+    $objectResponse = Http::get($objectUrl);
+    if ($objectResponse->successful()) {
+      $this->syncObjects($objectResponse->json());
+    } else {
+      $this->error("Failed to fetch object data.");
+    }
 
-		$this->info("Fetching task data...");
-		$taskResponse = Http::get($taskUrl);
-		if ($taskResponse->successful()) {
-			$this->syncTasks($taskResponse->json());
-		} else {
-			$this->error("Failed to fetch task data.");
-		}
+    $this->info("Fetching task data...");
+    $taskResponse = Http::get($taskUrl);
+    if ($taskResponse->successful()) {
+      $this->syncTasks($taskResponse->json());
+    } else {
+      $this->error("Failed to fetch task data.");
+    }
 
-		$this->info("Sync completed.");
-	}
+    $this->info("Sync completed.");
+  }
 
 	private function syncObjects($data)
 	{
-<<<<<<< HEAD
-		ObjectCategory::truncate();
-=======
 		DB::statement("SET FOREIGN_KEY_CHECKS=0");
 		ObjectContent::truncate();
 		ObjectCategory::truncate();
 		DB::statement("SET FOREIGN_KEY_CHECKS=1");
->>>>>>> 7e8d77d (updates)
 		foreach ($data as $category) {
 			$cat = ObjectCategory::create([
 				"code" => $category["code"],
@@ -70,14 +62,13 @@ class SyncObjectTask extends Command
 		}
 	}
 
-	private function syncTasks($data)
-	{
-		TaskCode::truncate();
-		foreach ($data as $task) {
-			TaskCode::create([
-				"code" => $task["code"],
-				"description" => $task["description"],
-			]);
-		}
-	}
+  private function syncTasks($data) {
+    TaskCode::truncate();
+    foreach ($data as $task) {
+      TaskCode::create([
+        "code" => $task["code"],
+        "description" => $task["description"],
+      ]);
+    }
+  }
 }

@@ -7,11 +7,12 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-<<<<<<< HEAD
 use Modules\ObjectTask\Telegram\ObjectCodeCommand;
+use Modules\ObjectTask\Services\ObjectCodeService;
 use Modules\ObjectTask\Telegram\TaskCodeCommand;
+use Modules\ObjectTask\Services\TaskCodeService;
+use Modules\Telegram\Services\Handlers\CallbackHandler as TelegramCallbackHandler;
 use Modules\Telegram\Services\Handlers\CommandDispatcher;
-=======
 use Modules\ObjectTask\Telegram\CallbackHandler;
 use Modules\ObjectTask\Telegram\ObjectCodeCommand;
 use Modules\ObjectTask\Telegram\TaskCodeCommand;
@@ -20,7 +21,6 @@ use Modules\ObjectTask\Services\TaskCodeService;
 use Modules\Telegram\Services\Handlers\CommandDispatcher;
 use Modules\Telegram\Services\Handlers\CallbackHandler as TelegramCallbackHandler;
 use Modules\Telegram\Services\Support\InlineKeyboardBuilder;
->>>>>>> 7e8d77d (updates)
 use Modules\Telegram\Services\Support\TelegramApi;
 
 class ObjectTaskServiceProvider extends ServiceProvider
@@ -47,159 +47,11 @@ class ObjectTaskServiceProvider extends ServiceProvider
 			$dispatcher = $this->app->make(CommandDispatcher::class);
 
 			$this->registerTelegramCommands($dispatcher);
-<<<<<<< HEAD
-			$this->registerTelegramMiddlewares($dispatcher);
-=======
->>>>>>> 7e8d77d (updates)
 		} else {
 			\Log::warning(
 				"Telegram CommandDispatcher not bound. Skipping command registration.",
 			);
 		}
-<<<<<<< HEAD
-	}
-
-	/**
-	 * Register the service provider.
-	 */
-	public function register(): void
-	{
-		$this->app->register(EventServiceProvider::class);
-		$this->app->register(RouteServiceProvider::class);
-	}
-
-	protected function registerTelegramCommands(
-		CommandDispatcher $dispatcher,
-	): void {
-		$dispatcher->registerCommand(
-			new ObjectCodeCommand($this->app->make(TelegramApi::class)),
-		);
-		$dispatcher->registerCommand(
-			new TaskCodeCommand($this->app->make(TelegramApi::class)),
-		);
-	}
-
-	protected function registerTelegramMiddlewares(
-		CommandDispatcher $dispatcher,
-	): void {
-		// $dispatcher->registerMiddleware();
-	}
-
-	/**
-	 * Register commands in the format of Command::class
-	 */
-	protected function registerCommands(): void
-	{
-		$this->commands([\Modules\ObjectTask\Console\SyncObjectTask::class]);
-	}
-
-	/**
-	 * Register command Schedules.
-	 */
-	protected function registerCommandSchedules(): void
-	{
-		// $this->app->booted(function () {
-		//     $schedule = $this->app->make(Schedule::class);
-		//     $schedule->command('inspire')->hourly();
-		// });
-	}
-
-	/**
-	 * Register translations.
-	 */
-	public function registerTranslations(): void
-	{
-		$langPath = resource_path("lang/modules/" . $this->nameLower);
-
-		if (is_dir($langPath)) {
-			$this->loadTranslationsFrom($langPath, $this->nameLower);
-			$this->loadJsonTranslationsFrom($langPath);
-		} else {
-			$this->loadTranslationsFrom(
-				module_path($this->name, "lang"),
-				$this->nameLower,
-			);
-			$this->loadJsonTranslationsFrom(module_path($this->name, "lang"));
-		}
-	}
-
-	/**
-	 * Register config.
-	 */
-	protected function registerConfig(): void
-	{
-		$configPath = module_path(
-			$this->name,
-			config("modules.paths.generator.config.path"),
-		);
-
-		if (is_dir($configPath)) {
-			$iterator = new RecursiveIteratorIterator(
-				new RecursiveDirectoryIterator($configPath),
-			);
-
-			foreach ($iterator as $file) {
-				if ($file->isFile() && $file->getExtension() === "php") {
-					$config = str_replace(
-						$configPath . DIRECTORY_SEPARATOR,
-						"",
-						$file->getPathname(),
-					);
-					$config_key = str_replace(
-						[DIRECTORY_SEPARATOR, ".php"],
-						[".", ""],
-						$config,
-					);
-					$segments = explode(".", $this->nameLower . "." . $config_key);
-
-					// Remove duplicated adjacent segments
-					$normalized = [];
-					foreach ($segments as $segment) {
-						if (end($normalized) !== $segment) {
-							$normalized[] = $segment;
-						}
-					}
-
-					$key =
-						$config === "config.php"
-							? $this->nameLower
-							: implode(".", $normalized);
-
-					$this->publishes(
-						[$file->getPathname() => config_path($config)],
-						"config",
-					);
-					$this->merge_config_from($file->getPathname(), $key);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Merge config from the given path recursively.
-	 */
-	protected function merge_config_from(string $path, string $key): void
-	{
-		$existing = config($key, []);
-		$module_config = require $path;
-
-		config([$key => array_replace_recursive($existing, $module_config)]);
-	}
-
-	/**
-	 * Register views.
-	 */
-	public function registerViews(): void
-	{
-		$viewPath = resource_path("views/modules/" . $this->nameLower);
-		$sourcePath = module_path($this->name, "resources/views");
-
-		$this->publishes(
-			[$sourcePath => $viewPath],
-			["views", $this->nameLower . "-module-views"],
-		);
-
-=======
 
 		if ($this->app->bound(TelegramCallbackHandler::class)) {
 			$callback = $this->app->make(TelegramCallbackHandler::class);
@@ -377,7 +229,6 @@ class ObjectTaskServiceProvider extends ServiceProvider
 			["views", $this->nameLower . "-module-views"],
 		);
 
->>>>>>> 7e8d77d (updates)
 		$this->loadViewsFrom(
 			array_merge($this->getPublishableViewPaths(), [$sourcePath]),
 			$this->nameLower,

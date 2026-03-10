@@ -1,21 +1,13 @@
 <?php
 namespace Modules\ObjectTask\Telegram;
 
-<<<<<<< HEAD
-=======
 use Modules\ObjectTask\Models\TaskCode;
 use Modules\ObjectTask\Services\TaskCodeService;
->>>>>>> 7e8d77d (updates)
 use Modules\Telegram\Services\Support\TelegramApi;
 use Modules\Telegram\Services\Handlers\Commands\BaseCommandHandler;
 
 class TaskCodeCommand extends BaseCommandHandler
 {
-<<<<<<< HEAD
-	public function __construct(TelegramApi $telegram)
-	{
-		parent::__construct($telegram);
-=======
 	protected $taskcodeService;
 
 	public function __construct(
@@ -24,7 +16,6 @@ class TaskCodeCommand extends BaseCommandHandler
 	) {
 		parent::__construct($telegram);
 		$this->taskcodeService = $taskcodeService;
->>>>>>> 7e8d77d (updates)
 	}
 
 	public function getName(): string
@@ -46,8 +37,6 @@ class TaskCodeCommand extends BaseCommandHandler
 		?string $username = null,
 		array $params = [],
 	): array {
-<<<<<<< HEAD
-=======
 		$taskCode = $this->taskcodeService->getTaskCodes();
 		$messages = "*Task Code*:\n\n";
 		foreach ($taskCode as $task) {
@@ -60,7 +49,6 @@ class TaskCodeCommand extends BaseCommandHandler
 			"status" => "taskcode_sent",
 			"send_message" => ["text" => $messages, "parse_mode" => "MarkdownV2"],
 		];
->>>>>>> 7e8d77d (updates)
 		try {
 		} catch (\Exception $e) {
 			Log::error("Failed to get task code list", [

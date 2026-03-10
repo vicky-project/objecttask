@@ -12,21 +12,17 @@ return new class extends Migration {
 	{
 		Schema::create("object_categories", function (Blueprint $table) {
 			$table->id();
-<<<<<<< HEAD
-			$table->string("code")->unique();
-=======
 			$table->string("code");
->>>>>>> 7e8d77d (updates)
 			$table->string("name");
 			$table->timestamps();
 		});
 	}
 
-	/**
-	 * Reverse the migrations.
-	 */
-	public function down(): void
-	{
-		Schema::dropIfExists("object_categories");
-	}
+  /**
+  * Reverse the migrations.
+  */
+  public function down(): void
+  {
+    Schema::dropIfExists("object_categories");
+  }
 };
