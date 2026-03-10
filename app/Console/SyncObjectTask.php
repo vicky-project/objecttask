@@ -41,25 +41,26 @@ class SyncObjectTask extends Command
     $this->info("Sync completed.");
   }
 
-  private function syncObjects($data) {
-    DB::statement("SET FOREIGN_KEY_CHECKS=0");
-    ObjectContent::truncate();
-    ObjectCategory::truncate();
-    DB::statement("SET FOREIGN_KEY_CHECKS=1");
-    foreach ($data as $category) {
-      $cat = ObjectCategory::create([
-        "code" => $category["code"],
-        "name" => $category["name"],
-      ]);
-      foreach ($category["content"] as $content) {
-        ObjectContent::create([
-          "category_id" => $cat->id,
-          "description" => $content["description"],
-          "code" => $content["code"],
-        ]);
-      }
-    }
-  }
+	private function syncObjects($data)
+	{
+		DB::statement("SET FOREIGN_KEY_CHECKS=0");
+		ObjectContent::truncate();
+		ObjectCategory::truncate();
+		DB::statement("SET FOREIGN_KEY_CHECKS=1");
+		foreach ($data as $category) {
+			$cat = ObjectCategory::create([
+				"code" => $category["code"],
+				"name" => $category["name"],
+			]);
+			foreach ($category["content"] as $content) {
+				ObjectContent::create([
+					"category_id" => $cat->id,
+					"description" => $content["description"],
+					"code" => $content["code"],
+				]);
+			}
+		}
+	}
 
   private function syncTasks($data) {
     TaskCode::truncate();
