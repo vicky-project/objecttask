@@ -233,11 +233,15 @@
 
   // ================== COPY TO CLIPBOARD ==================
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-    showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
-    }).catch(err => {
-    showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
-    });
+    if (navigator) {
+      navigator.clipboard.writeText(text).then(() => {
+      showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
+      }).catch(err => {
+      showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
+      });
+    } else {
+      showToast("copyToClipboard tidak mendukung!") || alert("copyToClipboard tidak mendukung");
+    }
   }
 
   document.addEventListener("DOMContentLoaded", function() {
