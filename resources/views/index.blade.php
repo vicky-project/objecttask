@@ -234,11 +234,21 @@
   // ================== COPY TO CLIPBOARD ==================
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-    showToast(`Kode ${text} disalin`, 'success');
+    showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
     }).catch(err => {
-    showToast('Gagal menyalin', 'danger');
+    showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
     });
   }
+
+  document.addEventListener("DOMContentLoaded", function() {
+  const initData = window.Telegram?.WebApp?.initData || @json(request()->get("initData", ""));
+  if(!initData) return;
+
+  const home = document.querySelector('.home-button');
+  const urlObj = new URL(home.href, window.location.origin);
+  urlObj.searchParams.set("initData", initData);
+  home.href = urlObj.toString();
+  });
 </script>
 @endpush
 
