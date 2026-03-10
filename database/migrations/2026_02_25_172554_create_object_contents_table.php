@@ -17,7 +17,11 @@ return new class extends Migration {
 				->constrained("object_categories")
 				->onDelete("cascade");
 			$table->string("description");
+<<<<<<< HEAD
 			$table->string("code")->unique();
+=======
+			$table->string("code");
+>>>>>>> 7e8d77d (updates)
 			$table->timestamps();
 		});
 	}

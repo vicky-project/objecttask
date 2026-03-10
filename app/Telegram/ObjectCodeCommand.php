@@ -2,14 +2,34 @@
 namespace Modules\ObjectTask\Telegram;
 
 use Illuminate\Support\Facades\Log;
+<<<<<<< HEAD
+=======
+use Illuminate\Support\Collection;
+use Modules\ObjectTask\Services\ObjectCodeService;
+use Modules\Telegram\Services\Support\InlineKeyboardBuilder;
+>>>>>>> 7e8d77d (updates)
 use Modules\Telegram\Services\Support\TelegramApi;
 use Modules\Telegram\Services\Handlers\Commands\BaseCommandHandler;
 
 class ObjectCodeCommand extends BaseCommandHandler
 {
+<<<<<<< HEAD
 	public function __construct(TelegramApi $telegram)
 	{
 		parent::__construct($telegram);
+=======
+	protected ObjectCodeService $objectcodeService;
+	protected InlineKeyboardBuilder $inlineKeyboard;
+
+	public function __construct(
+		TelegramApi $telegram,
+		ObjectCodeService $objectcodeService,
+		InlineKeyboardBuilder $inlineKeyboard,
+	) {
+		parent::__construct($telegram);
+		$this->objectcodeService = $objectcodeService;
+		$this->inlineKeyboard = $inlineKeyboard;
+>>>>>>> 7e8d77d (updates)
 	}
 
 	public function getName(): string
@@ -32,6 +52,24 @@ class ObjectCodeCommand extends BaseCommandHandler
 		array $params = [],
 	): array {
 		try {
+<<<<<<< HEAD
+=======
+			$objectCode = $this->objectcodeService->getObjectCodes();
+
+			$messages = "*Object Code*\n\nPilih category:\n";
+
+			$keyboards = $this->prepareKeyboard($objectCode);
+
+			return [
+				"status" => "objectcode_sent",
+				"count" => count($objectCode),
+				"send_message" => [
+					"text" => $messages,
+					"parse_mode" => "MarkdownV2",
+					"reply_markup" => ["inline_keyboard" => $keyboards],
+				],
+			];
+>>>>>>> 7e8d77d (updates)
 		} catch (\Exception $e) {
 			Log::error("Failed to get object code list", [
 				"message" => $e->getMessage(),
@@ -45,4 +83,27 @@ class ObjectCodeCommand extends BaseCommandHandler
 			];
 		}
 	}
+<<<<<<< HEAD
+=======
+
+	private function prepareKeyboard(Collection $data): array
+	{
+		$this->inlineKeyboard->setModule("objecttask");
+		$this->inlineKeyboard->setEntity("object");
+
+		$items = $data
+			->map(function ($item) {
+				return [
+					"text" => $item->name,
+					"callback_data" => [
+						"value" => $item->id,
+						"action" => "content",
+					],
+				];
+			})
+			->toArray();
+
+		return $this->inlineKeyboard->grid($items, 2);
+	}
+>>>>>>> 7e8d77d (updates)
 }

@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Modules\ObjectTask\Http\Controllers\ObjectTaskController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('objecttasks', ObjectTaskController::class)->names('objecttask');
-});
+Route::prefix("apps")
+	->name("apps.")
+	->group(function () {
+		Route::get("objecttask", [ObjectTaskController::class, "index"])->name(
+			"objecttask",
+		);
+	});
