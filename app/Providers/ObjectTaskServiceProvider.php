@@ -100,7 +100,7 @@ class ObjectTaskServiceProvider extends ServiceProvider
 
   protected function registerHooks($hookService): void
   {
-    $hookService::add(
+    $hookService::registerHook(
       config($this->nameLower . ".hook.name"),
       $this->nameLower."::hooks.app"
     );
