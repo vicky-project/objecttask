@@ -248,8 +248,12 @@
   const initData = window.Telegram?.WebApp?.initData || @json(request()->get("initData", ""));
   if(!initData) return;
 
+  let token = localStorage.getItem("telegram_token") || '{{ request()->get("token") }}';
+  if(!token) return;
+
   const home = document.querySelector('.home-button');
   const urlObj = new URL(home.href, window.location.origin);
+  urlObj.searchParams.set("token", token || "");
   urlObj.searchParams.set("initData", initData);
   home.href = urlObj.toString();
   });
