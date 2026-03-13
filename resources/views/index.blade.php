@@ -58,15 +58,36 @@
 @push('scripts')
 <script>
   // ================== COPY TO CLIPBOARD ==================
+  function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed'; // Hindari scroll ke bawah
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showToast ? showToast(`Kode ${text} disalin`, 'success'): alert(`Kode ${text} disalin`);
+      } else {
+        throw new Error('Fallback copy gagal');
+      }
+    } catch (err) {
+      showToast ? showToast('Gagal menyalin', 'danger'): alert('Gagal menyalin');
+    }
+    document.body.removeChild(textarea);
+  }
+
   function copyToClipboard(text) {
-    if (navigator) {
+    if (!navigator.clipboard) {
+      fallbackCopy(text);
+      return;
+    } else {
       navigator.clipboard.writeText(text).then(() => {
       showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
       }).catch(err => {
-      showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
+      fallbackCopy(text);
       });
-    } else {
-      showToast("copyToClipboard tidak mendukung!") || alert("copyToClipboard tidak mendukung");
     }
   }
 
