@@ -57,6 +57,19 @@
 
 @push('scripts')
 <script>
+  // ================== COPY TO CLIPBOARD ==================
+  function copyToClipboard(text) {
+    if (navigator) {
+      navigator.clipboard.writeText(text).then(() => {
+      showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
+      }).catch(err => {
+      showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
+      });
+    } else {
+      showToast("copyToClipboard tidak mendukung!") || alert("copyToClipboard tidak mendukung");
+    }
+  }
+
   function showLoading(containerId, message = 'Memuat data...') {
     const container = document.getElementById(containerId);
     if (container) {
@@ -231,32 +244,6 @@
   renderTasks(tasks);
   });
 
-  // ================== COPY TO CLIPBOARD ==================
-  function copyToClipboard(text) {
-    if (navigator) {
-      navigator.clipboard.writeText(text).then(() => {
-      showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
-      }).catch(err => {
-      showToast('Gagal menyalin', 'danger') || alert("Gagal menyalin");
-      });
-    } else {
-      showToast("copyToClipboard tidak mendukung!") || alert("copyToClipboard tidak mendukung");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function() {
-  const initData = window.Telegram?.WebApp?.initData || @json(request()->get("initData", ""));
-  if(!initData) return;
-
-  let token = localStorage.getItem("telegram_token") || '{{ request()->get("token") }}';
-  if(!token) return;
-
-  const home = document.querySelector('.home-button');
-  const urlObj = new URL(home.href, window.location.origin);
-  urlObj.searchParams.set("token", token || "");
-  urlObj.searchParams.set("initData", initData);
-  home.href = urlObj.toString();
-  });
 </script>
 @endpush
 
