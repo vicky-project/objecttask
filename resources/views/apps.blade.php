@@ -1,11 +1,4 @@
 <div class="container-custom">
-  <div class="page-header">
-    <a href="{{ route('telegram.home') }}" class="home-button disabled" title="Kembali ke Beranda">
-      <i class="bi bi-house-door fs-1"></i>
-    </a>
-    <h2>Object & Task Code</h2>
-  </div>
-
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" id="dataTab" role="tablist">
     <li class="nav-item" role="presentation">
