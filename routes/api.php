@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Modules\ObjectTask\Http\Controllers\ObjectTaskController;
 
-Route::prefix("data-object")->group(function () {
+Route::prefix("data-object")
+->middleware('auth:sanctum')
+->group(function () {
   Route::prefix("categories")->group(function () {
     Route::get("", [ObjectTaskController::class, "categories"]);
     Route::get("/{id}/contents", [ObjectTaskController::class, "contents"]);

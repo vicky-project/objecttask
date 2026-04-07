@@ -41,6 +41,265 @@
   </div>
 </div>
 
+<script>
+  // Namespace untuk menghindari konflik global
+  window.taskModule = window.taskModule || {};
+
+  (function() {
+  // Ambil token dari localStorage (dari parent SPA)
+  function getAuthToken() {
+  return localStorage.getItem('telegram_token');
+  }
+
+  // Fungsi toast: gunakan parent jika ada, fallback alert
+  function showToast(message, type = 'info') {
+  if (typeof window.showToast === 'function') {
+  window.showToast(message);
+  } else {
+  alert(message);
+  }
+  }
+
+  // Copy to clipboard dengan fallback
+  function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+  navigator.clipboard.writeText(text).then(() => {
+  showToast(`Kode ${text} disalin`, 'success');
+  }).catch(() => fallbackCopy(text));
+  } else {
+  fallbackCopy(text);
+  }
+  }
+
+  function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+  document.execCommand('copy');
+  showToast(`Kode ${text} disalin`, 'success');
+  } catch (err) {
+  showToast('Gagal menyalin', 'danger');
+  }
+  document.body.removeChild(textarea);
+  }
+
+  function showLoading(containerId, message = 'Memuat data...') {
+  const container = document.getElementById(containerId);
+  if (container) {
+  container.innerHTML = `
+  <div class="loading-container">
+  <div class="spinner-border loading-spinner" role="status">
+  <span class="visually-hidden">Loading...</span>
+  </div>
+  <div>${message}</div>
+  </div>
+  `;
+  }
+  }
+
+  // Data
+  let categories = [];
+  let tasks = [];
+  let currentCategory = null;
+
+  // Fetch dengan autentikasi token
+  async function fetchWithAuth(url) {
+  const token = getAuthToken();
+  const headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+  };
+  if (token) {
+  headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(url, { headers });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+  }
+
+  // Render daftar kategori
+  function renderCategories(cats) {
+  const container = document.getElementById('categories-container');
+  const searchTerm = document.getElementById('object-search').value.toLowerCase();
+
+  let filtered = cats;
+  if (searchTerm) {
+  filtered = cats.filter(cat =>
+  cat.name.toLowerCase().includes(searchTerm) ||
+  cat.code.toLowerCase().includes(searchTerm)
+  );
+  }
+
+  if (filtered.length === 0) {
+  container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada kategori</div>';
+  return;
+  }
+
+  let html = '';
+  filtered.forEach(cat => {
+  html += `
+  <div class="category-item" onclick="taskModule.showContents('${cat.id}', '${cat.code}')">
+  <div>
+  <div class="category-name">${escapeHtml(cat.name)}</div>
+  <div class="category-code">${escapeHtml(cat.code)}</div>
+  </div>
+  <i class="bi bi-chevron-right" style="color: var(--tg-secondary-text, #999);"></i>
+  </div>
+  `;
+  });
+  container.innerHTML = html;
+  }
+
+  // Render daftar task
+  function renderTasks(taskList) {
+  const container = document.getElementById('tasks-container');
+  const searchTerm = document.getElementById('task-search').value.toLowerCase();
+
+  let filtered = taskList;
+  if (searchTerm) {
+  filtered = taskList.filter(task =>
+  task.code.toLowerCase().includes(searchTerm) ||
+  task.description.toLowerCase().includes(searchTerm)
+  );
+  }
+
+  if (filtered.length === 0) {
+  container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada task code</div>';
+  return;
+  }
+
+  let html = '';
+  filtered.forEach(task => {
+  html += `
+  <div class="task-item" onclick="taskModule.copyToClipboard('${escapeHtml(task.code)}')">
+  <div>
+  <div class="task-desc">${escapeHtml(task.description)}</div>
+  <div class="task-code">${escapeHtml(task.code)}</div>
+  </div>
+  <i class="bi bi-copy" style="color: var(--tg-link, #007aff);"></i>
+  </div>
+  `;
+  });
+  container.innerHTML = html;
+  }
+
+  // Tampilkan konten dari kategori yang dipilih
+  window.taskModule.showContents = async function(id, code) {
+  currentCategory = categories.find(c => c.code === code);
+  if (!currentCategory) return;
+
+  document.getElementById('categories-container').style.display = 'none';
+  document.getElementById('back-to-categories').style.display = 'block';
+  document.getElementById('contents-container').style.display = 'block';
+
+  showLoading('contents-container', 'Memuat contents...');
+
+  try {
+  const data = await fetchWithAuth(`${BASE_URL}/api/data-object/categories/${id}/contents`);
+  renderContents(data);
+  } catch (error) {
+  document.getElementById('contents-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat contents</div>';
+  showToast('Gagal memuat konten: ' + error.message, 'danger');
+  }
+  };
+
+  function renderContents(contents) {
+  const container = document.getElementById('contents-container');
+  if (contents.length === 0) {
+  container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada konten</div>';
+  return;
+  }
+
+  let html = '';
+  contents.forEach(item => {
+  html += `
+  <div class="content-item" onclick="taskModule.copyToClipboard('${escapeHtml(item.code)}')">
+  <div>
+  <div class="content-desc">${escapeHtml(item.description)}</div>
+  <div class="content-code">${escapeHtml(item.code)}</div>
+  </div>
+  <i class="bi bi-copy" style="color: var(--tg-link, #007aff);"></i>
+  </div>
+  `;
+  });
+  container.innerHTML = html;
+  }
+
+  // Kembali ke daftar kategori
+  window.taskModule.showCategories = function() {
+  document.getElementById('categories-container').style.display = 'block';
+  document.getElementById('back-to-categories').style.display = 'none';
+  document.getElementById('contents-container').style.display = 'none';
+  renderCategories(categories);
+  };
+
+  window.taskModule.copyToClipboard = copyToClipboard;
+
+  function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+  if (m === '&') return '&amp;';
+  if (m === '<') return '&lt;';
+  if (m === '>') return '&gt;';
+  return m;
+  });
+  }
+
+  // Inisialisasi: fetch data dari API
+  showLoading('categories-container', 'Memuat object codes...');
+  showLoading('tasks-container', 'Memuat task codes...');
+
+  Promise.all([
+  fetchWithAuth(`${BASE_URL}/api/data-object/categories`),
+  fetchWithAuth(`${BASE_URL}/api/data-object/task-codes`)
+  ]).then(([cats, tsk]) => {
+  categories = cats;
+  tasks = tsk;
+  document.getElementById('object-count-badge').textContent = categories.length;
+  document.getElementById('task-count-badge').textContent = tasks.length;
+  renderCategories(categories);
+  renderTasks(tasks);
+  }).catch(error => {
+  document.getElementById('categories-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat object codes</div>';
+  document.getElementById('tasks-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat task codes</div>';
+  showToast('Gagal memuat data: ' + error.message, 'danger');
+  });
+
+  // Event listener untuk pencarian
+  document.getElementById('object-search').addEventListener('input', function() {
+  if (document.getElementById('categories-container').style.display !== 'none') {
+  renderCategories(categories);
+  }
+  });
+  document.getElementById('task-search').addEventListener('input', function() {
+  renderTasks(tasks);
+  });
+
+  // Inisialisasi Bootstrap tabs (jika Bootstrap JS tersedia)
+  if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+  const triggerTabList = [].slice.call(document.querySelectorAll('#dataTab button'));
+  triggerTabList.forEach(triggerEl => {
+  new bootstrap.Tab(triggerEl);
+  });
+  } else {
+  // Fallback manual jika Bootstrap JS tidak ada
+  document.querySelectorAll('#dataTab button').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+  e.preventDefault();
+  const targetId = this.getAttribute('data-bs-target');
+  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+  document.querySelector(targetId).classList.add('show', 'active');
+  document.querySelectorAll('#dataTab button').forEach(b => b.classList.remove('active'));
+  this.classList.add('active');
+  });
+  });
+  }
+  })();
+</script>
+
 <style>
   /* Gaya mengikuti tema Telegram */
   .container-custom {
@@ -122,262 +381,3 @@
     background-color: var(--tg-link, #007aff) !important;
     }
     </style>
-
-    <script>
-    // Namespace untuk menghindari konflik global
-    window.taskModule = window.taskModule || {};
-
-    (function() {
-    // Ambil token dari localStorage (dari parent SPA)
-    function getAuthToken() {
-    return localStorage.getItem('telegram_token');
-    }
-
-    // Fungsi toast: gunakan parent jika ada, fallback alert
-    function showToast(message, type = 'info') {
-    if (typeof window.showToast === 'function') {
-    window.showToast(message);
-    } else {
-    alert(message);
-    }
-    }
-
-    // Copy to clipboard dengan fallback
-    function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-    showToast(`Kode ${text} disalin`, 'success');
-    }).catch(() => fallbackCopy(text));
-    } else {
-    fallbackCopy(text);
-    }
-    }
-
-    function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-    document.execCommand('copy');
-    showToast(`Kode ${text} disalin`, 'success');
-    } catch (err) {
-    showToast('Gagal menyalin', 'danger');
-    }
-    document.body.removeChild(textarea);
-    }
-
-    function showLoading(containerId, message = 'Memuat data...') {
-    const container = document.getElementById(containerId);
-    if (container) {
-    container.innerHTML = `
-    <div class="loading-container">
-    <div class="spinner-border loading-spinner" role="status">
-    <span class="visually-hidden">Loading...</span>
-    </div>
-    <div>${message}</div>
-    </div>
-    `;
-    }
-    }
-
-    // Data
-    let categories = [];
-    let tasks = [];
-    let currentCategory = null;
-
-    // Fetch dengan autentikasi token
-    async function fetchWithAuth(url) {
-    const token = getAuthToken();
-    const headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-    };
-    if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-    }
-    const response = await fetch(url, { headers });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-    }
-
-    // Render daftar kategori
-    function renderCategories(cats) {
-    const container = document.getElementById('categories-container');
-    const searchTerm = document.getElementById('object-search').value.toLowerCase();
-
-    let filtered = cats;
-    if (searchTerm) {
-    filtered = cats.filter(cat =>
-    cat.name.toLowerCase().includes(searchTerm) ||
-    cat.code.toLowerCase().includes(searchTerm)
-    );
-    }
-
-    if (filtered.length === 0) {
-    container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada kategori</div>';
-    return;
-    }
-
-    let html = '';
-    filtered.forEach(cat => {
-    html += `
-    <div class="category-item" onclick="taskModule.showContents('${cat.id}', '${cat.code}')">
-    <div>
-    <div class="category-name">${escapeHtml(cat.name)}</div>
-    <div class="category-code">${escapeHtml(cat.code)}</div>
-    </div>
-    <i class="bi bi-chevron-right" style="color: var(--tg-secondary-text, #999);"></i>
-    </div>
-    `;
-    });
-    container.innerHTML = html;
-    }
-
-    // Render daftar task
-    function renderTasks(taskList) {
-    const container = document.getElementById('tasks-container');
-    const searchTerm = document.getElementById('task-search').value.toLowerCase();
-
-    let filtered = taskList;
-    if (searchTerm) {
-    filtered = taskList.filter(task =>
-    task.code.toLowerCase().includes(searchTerm) ||
-    task.description.toLowerCase().includes(searchTerm)
-    );
-    }
-
-    if (filtered.length === 0) {
-    container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada task code</div>';
-    return;
-    }
-
-    let html = '';
-    filtered.forEach(task => {
-    html += `
-    <div class="task-item" onclick="taskModule.copyToClipboard('${escapeHtml(task.code)}')">
-    <div>
-    <div class="task-desc">${escapeHtml(task.description)}</div>
-    <div class="task-code">${escapeHtml(task.code)}</div>
-    </div>
-    <i class="bi bi-copy" style="color: var(--tg-link, #007aff);"></i>
-    </div>
-    `;
-    });
-    container.innerHTML = html;
-    }
-
-    // Tampilkan konten dari kategori yang dipilih
-    window.taskModule.showContents = async function(id, code) {
-    currentCategory = categories.find(c => c.code === code);
-    if (!currentCategory) return;
-
-    document.getElementById('categories-container').style.display = 'none';
-    document.getElementById('back-to-categories').style.display = 'block';
-    document.getElementById('contents-container').style.display = 'block';
-
-    showLoading('contents-container', 'Memuat contents...');
-
-    try {
-    const data = await fetchWithAuth(`/api/data-object/categories/${id}/contents`);
-    renderContents(data);
-    } catch (error) {
-    document.getElementById('contents-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat contents</div>';
-    showToast('Gagal memuat konten: ' + error.message, 'danger');
-    }
-    };
-
-    function renderContents(contents) {
-    const container = document.getElementById('contents-container');
-    if (contents.length === 0) {
-    container.innerHTML = '<div class="text-center p-4 text-muted">Tidak ada konten</div>';
-    return;
-    }
-
-    let html = '';
-    contents.forEach(item => {
-    html += `
-    <div class="content-item" onclick="taskModule.copyToClipboard('${escapeHtml(item.code)}')">
-    <div>
-    <div class="content-desc">${escapeHtml(item.description)}</div>
-    <div class="content-code">${escapeHtml(item.code)}</div>
-    </div>
-    <i class="bi bi-copy" style="color: var(--tg-link, #007aff);"></i>
-    </div>
-    `;
-    });
-    container.innerHTML = html;
-    }
-
-    // Kembali ke daftar kategori
-    window.taskModule.showCategories = function() {
-    document.getElementById('categories-container').style.display = 'block';
-    document.getElementById('back-to-categories').style.display = 'none';
-    document.getElementById('contents-container').style.display = 'none';
-    renderCategories(categories);
-    };
-
-    window.taskModule.copyToClipboard = copyToClipboard;
-
-    function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
-    });
-    }
-
-    // Inisialisasi: fetch data dari API
-    showLoading('categories-container', 'Memuat object codes...');
-    showLoading('tasks-container', 'Memuat task codes...');
-
-    Promise.all([
-    fetchWithAuth('/api/data-object/categories'),
-    fetchWithAuth('/api/data-object/task-codes')
-    ]).then(([cats, tsk]) => {
-    categories = cats;
-    tasks = tsk;
-    document.getElementById('object-count-badge').textContent = categories.length;
-    document.getElementById('task-count-badge').textContent = tasks.length;
-    renderCategories(categories);
-    renderTasks(tasks);
-    }).catch(error => {
-    document.getElementById('categories-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat object codes</div>';
-    document.getElementById('tasks-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat task codes</div>';
-    showToast('Gagal memuat data: ' + error.message, 'danger');
-    });
-
-    // Event listener untuk pencarian
-    document.getElementById('object-search').addEventListener('input', function() {
-    if (document.getElementById('categories-container').style.display !== 'none') {
-    renderCategories(categories);
-    }
-    });
-    document.getElementById('task-search').addEventListener('input', function() {
-    renderTasks(tasks);
-    });
-
-    // Inisialisasi Bootstrap tabs (jika Bootstrap JS tersedia)
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
-    const triggerTabList = [].slice.call(document.querySelectorAll('#dataTab button'));
-    triggerTabList.forEach(triggerEl => {
-    new bootstrap.Tab(triggerEl);
-    });
-    } else {
-    // Fallback manual jika Bootstrap JS tidak ada
-    document.querySelectorAll('#dataTab button').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    const targetId = this.getAttribute('data-bs-target');
-    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
-    document.querySelector(targetId).classList.add('show', 'active');
-    document.querySelectorAll('#dataTab button').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    });
-    });
-    }
-    })();
-    </script>
