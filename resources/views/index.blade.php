@@ -130,29 +130,6 @@
   let tasks = [];
   let currentCategory = null;
 
-  showLoading('categories-container', 'Memuat object codes...');
-  showLoading('tasks-container', 'Memuat task codes...');
-
-  async function loadData() {
-    try {
-      const [cats,
-        tsk] = await Promise.all([
-      fetchWithAuth('{{ config("app.url") }}/api/data-object/categories'),
-      fetchWithAuth('{{ config("app.url") }}/api/data-object/task-codes')
-      ]);
-      categories = cats;
-      tasks = tsk;
-      document.getElementById('object-count-badge').textContent = categories.length;
-      document.getElementById('task-count-badge').textContent = tasks.length;
-      renderCategories(categories);
-      renderTasks(tasks);
-    } catch(err) {
-      console.error(err);
-      document.getElementById('categories-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
-      document.getElementById('tasks-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
-    }
-  }
-
   // ================== OBJECTS ==================
   function renderCategories(cats) {
     const container = document.getElementById('categories-container');
@@ -230,13 +207,6 @@
     document.getElementById('contents-container').style.display = 'none';
     renderCategories(categories);
   }
-
-  document.getElementById('object-search').addEventListener('input', function() {
-  if (document.getElementById('categories-container').style.display !== 'none') {
-  renderCategories(categories);
-  }
-  });
-
   // ================== TASKS ==================
   function renderTasks(taskList) {
     const container = document.getElementById('tasks-container');
@@ -266,6 +236,36 @@
     });
     container.innerHTML = html;
   }
+
+  async function loadData() {
+    showLoading('categories-container', 'Memuat object codes...');
+    showLoading('tasks-container', 'Memuat task codes...');
+    try {
+      const [cats,
+        tsk] = await Promise.all([
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/categories'),
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/task-codes')
+      ]);
+      categories = cats;
+      tasks = tsk;
+      document.getElementById('object-count-badge').textContent = categories.length;
+      document.getElementById('task-count-badge').textContent = tasks.length;
+      renderCategories(categories);
+      renderTasks(tasks);
+    } catch(err) {
+      console.error(err);
+      document.getElementById('categories-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
+      document.getElementById('tasks-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
+    }
+  }
+
+
+  document.getElementById('object-search').addEventListener('input', function() {
+  if (document.getElementById('categories-container').style.display !== 'none') {
+  renderCategories(categories);
+  }
+  });
+
 
   document.getElementById('task-search').addEventListener('input', function() {
   renderTasks(tasks);
