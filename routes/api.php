@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\ObjectTask\Http\Controllers\ObjectTaskController;
 
 Route::prefix("data-object")
+->middleware('auth:sanctum')
 ->group(function () {
   Route::get('', [ObjectTaskController::class, 'index']);
 
