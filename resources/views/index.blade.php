@@ -76,7 +76,11 @@
     try {
       const successful = document.execCommand('copy');
       if (successful) {
-        showToast ? showToast(`Kode ${text} disalin`, 'success'): alert(`Kode ${text} disalin`);
+        if (typeof showToast === "function") {
+          showToast(`Kode ${text} disalin`, 'success')
+        } else {
+          alert(`Kode ${text} disalin`);
+        }
       } else {
         throw new Error('Fallback copy gagal');
       }
@@ -114,7 +118,6 @@
   }
 
   async function fetchWithAuth(url) {
-    alert(token);
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
