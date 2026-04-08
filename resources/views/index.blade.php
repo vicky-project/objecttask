@@ -261,6 +261,7 @@
     }
   }
 
+  loadData();
 
   document.getElementById('object-search').addEventListener('input', function() {
   if (document.getElementById('categories-container').style.display !== 'none') {
@@ -268,12 +269,9 @@
   }
   });
 
-
   document.getElementById('task-search').addEventListener('input', function() {
   renderTasks(tasks);
   });
-
-  loadData();
 </script>
 @endpush
 
