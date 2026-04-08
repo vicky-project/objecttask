@@ -4,13 +4,6 @@
 
 @section('content')
 <div class="container-custom">
-  <div class="page-header">
-    <a href="{{ route('telegram.home') }}" class="home-button disabled" title="Kembali ke Beranda">
-      <i class="bi bi-house-door fs-1"></i>
-    </a>
-    <h2>Object & Task Code</h2>
-  </div>
-
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" id="dataTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -57,6 +50,21 @@
 
 @push('scripts')
 <script>
+  // ========== AMBIL TOKEN DARI URL PARAMETER ==========
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('token');
+  if (tokenFromUrl) {
+    localStorage.setItem('telegram_token', tokenFromUrl);
+  }
+
+  // ========== CEK KETERSEDIAAN TOKEN ==========
+  const token = localStorage.getItem('telegram_token');
+  if (!token) {
+    document.body.innerHTML = '<div class="loading" style="padding:40px;text-align:center;">Token tidak ditemukan. Pastikan Anda membuka aplikasi dari Telegram Mini App yang sudah terautentikasi.</div>';
+    alert("Token tidak ditemukan");
+    throw new Error('Token tidak ditemukan');
+  }
+
   // ================== COPY TO CLIPBOARD ==================
   function fallbackCopy(text) {
     const textarea = document.createElement('textarea');
@@ -68,7 +76,11 @@
     try {
       const successful = document.execCommand('copy');
       if (successful) {
-        showToast ? showToast(`Kode ${text} disalin`, 'success'): alert(`Kode ${text} disalin`);
+        if (typeof showToast === "function") {
+          showToast(`Kode ${text} disalin`, 'success')
+        } else {
+          alert(`Kode ${text} disalin`);
+        }
       } else {
         throw new Error('Fallback copy gagal');
       }
@@ -105,40 +117,23 @@
     }
   }
 
+  async function fetchWithAuth(url) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    const res = await fetch(url, {
+      headers
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
   // Data
   let categories = [];
   let tasks = [];
   let currentCategory = null;
-
-  showLoading('categories-container', 'Memuat object codes...');
-  showLoading('tasks-container', 'Memuat task codes...');
-
-  // Inisialisasi: fetch data
-  Promise.all([
-  fetch('{{ secure_url(config("app.url")) }}/api/data-object/categories', {
-  headers: {
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
-  }
-  }).then(res => res.json()),
-  fetch('{{ secure_url(config("app.url")) }}/api/data-object/task-codes',{
-  headers: {
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
-  }
-  }).then(res => res.json())
-  ]).then(([cats, tsk]) => {
-  categories = cats;
-  tasks = tsk;
-  document.getElementById('object-count-badge').textContent = categories.length;
-  document.getElementById('task-count-badge').textContent = tasks.length;
-  renderCategories(categories);
-  renderTasks(tasks);
-  }).catch(error => {
-  document.getElementById('categories-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat object codes</div>';
-  document.getElementById('tasks-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat task codes</div>';
-  showToast('Gagal memuat data: ' + error.message, 'danger');
-  });
 
   // ================== OBJECTS ==================
   function renderCategories(cats) {
@@ -173,7 +168,7 @@
     container.innerHTML = html;
   }
 
-  function showContents(id, code) {
+  async function showContents(id, code) {
     currentCategory = categories.find(c => c.code === code);
     if (!currentCategory) return;
 
@@ -183,20 +178,13 @@
 
     showLoading('contents-container', 'Memuat contents...');
 
-    fetch(`{{ secure_url(config("app.url")) }}/api/data-object/categories/${id}/contents`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-    renderContents(data);
-    })
-    .catch(error => {
-    document.getElementById('contents-container').innerHTML = '<div class="text-center p-4 text-danger">Gagal memuat contents</div>';
-    showToast('Gagal memuat konten: ' + error.message, 'danger');
-    });
+    try {
+      const data = await fetchWithAuth(`{{ config("app.url") }}/api/data-object/categories/${id}/contents`);
+      renderContents(data);
+    } catch(err) {
+      document.getElementById('contents-container').innerHTML = `<div class="loading">Gagal memuat konten: ${err.message}</div>`;
+      showToast('Gagal memuat konten: ' + error.message, 'danger');
+    }
   }
 
   function renderContents(contents) {
@@ -224,13 +212,6 @@
     document.getElementById('contents-container').style.display = 'none';
     renderCategories(categories);
   }
-
-  document.getElementById('object-search').addEventListener('input', function() {
-  if (document.getElementById('categories-container').style.display !== 'none') {
-  renderCategories(categories);
-  }
-  });
-
   // ================== TASKS ==================
   function renderTasks(taskList) {
     const container = document.getElementById('tasks-container');
@@ -261,10 +242,39 @@
     container.innerHTML = html;
   }
 
+  async function loadData() {
+    showLoading('categories-container', 'Memuat object codes...');
+    showLoading('tasks-container', 'Memuat task codes...');
+    try {
+      const [cats,
+        tsk] = await Promise.all([
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/categories'),
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/task-codes')
+      ]);
+      categories = cats;
+      tasks = tsk;
+      document.getElementById('object-count-badge').textContent = categories.length;
+      document.getElementById('task-count-badge').textContent = tasks.length;
+      renderCategories(categories);
+      renderTasks(tasks);
+    } catch(err) {
+      console.error(err);
+      document.getElementById('categories-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
+      document.getElementById('tasks-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
+    }
+  }
+
+  loadData();
+
+  document.getElementById('object-search').addEventListener('input', function() {
+  if (document.getElementById('categories-container').style.display !== 'none') {
+  renderCategories(categories);
+  }
+  });
+
   document.getElementById('task-search').addEventListener('input', function() {
   renderTasks(tasks);
   });
-
 </script>
 @endpush
 
