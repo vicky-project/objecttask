@@ -208,7 +208,7 @@
       contentsContainerDiv.style.display = 'block';
       contentsList.innerHTML = '<div class="loading">Memuat konten...</div>';
       try {
-      const data = await fetchWithAuth(`/api/data-object/categories/${categoryId}/contents`);
+      const data = await fetchWithAuth(`{{ config("app.url") }}/api/data-object/categories/${categoryId}/contents`);
       renderContents(data);
       } catch (err) {
       contentsList.innerHTML = `<div class="loading">Gagal memuat konten: ${err.message}</div>`;
