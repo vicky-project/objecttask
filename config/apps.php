@@ -8,6 +8,6 @@ return [
   'launch_url' => env('APP_URL') . '/apps/objecttask',
   'render_type' => 'iframe',
   'render_config' => [
-    'url' => env('APP_URL') . '/api/data-object'
+    'url' => env('APP_URL') . '/apps/objecttask'
   ]
 ];
