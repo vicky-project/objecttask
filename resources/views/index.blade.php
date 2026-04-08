@@ -165,7 +165,7 @@
     container.innerHTML = html;
   }
 
-  function showContents(id, code) {
+  async function showContents(id, code) {
     currentCategory = categories.find(c => c.code === code);
     if (!currentCategory) return;
 
@@ -176,7 +176,7 @@
     showLoading('contents-container', 'Memuat contents...');
 
     try {
-      const data = await fetchWithAuth(`{{ config("app.url") }}/api/data-object/categories/${categoryId}/contents`);
+      const data = await fetchWithAuth(`{{ config("app.url") }}/api/data-object/categories/${id}/contents`);
       renderContents(data);
     } catch(err) {
       document.getElementById('contents-container').innerHTML = `<div class="loading">Gagal memuat konten: ${err.message}</div>`;
