@@ -61,6 +61,7 @@
   const token = localStorage.getItem('telegram_token');
   if (!token) {
     document.body.innerHTML = '<div class="loading" style="padding:40px;text-align:center;">Token tidak ditemukan. Pastikan Anda membuka aplikasi dari Telegram Mini App yang sudah terautentikasi.</div>';
+    alert("Token tidak ditemukan");
     throw new Error('Token tidak ditemukan');
   }
 
@@ -113,6 +114,7 @@
   }
 
   async function fetchWithAuth(url) {
+    alert(token);
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
