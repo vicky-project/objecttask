@@ -333,8 +333,8 @@
       async function loadData() {
       try {
       const [cats, tsk] = await Promise.all([
-      fetchWithAuth('/api/data-object/categories'),
-      fetchWithAuth('/api/data-object/task-codes')
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/categories'),
+      fetchWithAuth('{{ config("app.url") }}/api/data-object/task-codes')
       ]);
       categories = cats;
       tasks = tsk;
