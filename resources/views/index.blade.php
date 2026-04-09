@@ -1,4 +1,4 @@
-@extends('coreui::layouts.mini-app')
+@extends('telegram::layouts.mini-app')
 
 @section('title', 'Data Catalog')
 
@@ -27,7 +27,7 @@
         <input type="text" class="search-box" id="object-search" placeholder="Cari kategori...">
       </div>
 
-      <div id="back-to-categories" onclick="showCategories()">
+      <div id="back-to-categories" style="display: none;">
         <i class="bi bi-arrow-left"></i> Kembali ke Kategori
       </div>
 
@@ -45,90 +45,19 @@
     </div>
   </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
-  // ========== AMBIL TOKEN DARI URL PARAMETER ==========
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenFromUrl = urlParams.get('token');
-  if (tokenFromUrl) {
-    localStorage.setItem('telegram_token', tokenFromUrl);
-  }
-
-  // ========== CEK KETERSEDIAAN TOKEN ==========
-  const token = localStorage.getItem('telegram_token');
-  if (!token) {
-    document.body.innerHTML = '<div class="loading" style="padding:40px;text-align:center;">Token tidak ditemukan. Pastikan Anda membuka aplikasi dari Telegram Mini App yang sudah terautentikasi.</div>';
-    alert("Token tidak ditemukan");
-    throw new Error('Token tidak ditemukan');
-  }
-
-  // ================== COPY TO CLIPBOARD ==================
-  function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed'; // Hindari scroll ke bawah
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    try {
-      const successful = document.execCommand('copy');
-      if (successful) {
-        if (typeof showToast === "function") {
-          showToast(`Kode ${text} disalin`, 'success')
-        } else {
-          alert(`Kode ${text} disalin`);
-        }
-      } else {
-        throw new Error('Fallback copy gagal');
-      }
-    } catch (err) {
-      showToast ? showToast('Gagal menyalin', 'danger'): alert('Gagal menyalin');
-    }
-    document.body.removeChild(textarea);
-  }
-
-  function copyToClipboard(text) {
-    if (!navigator.clipboard) {
-      fallbackCopy(text);
-      return;
-    } else {
-      navigator.clipboard.writeText(text).then(() => {
-      showToast(`Kode ${text} disalin`, 'success') || alert(`Kode ${text} disalin`);
-      }).catch(err => {
-      fallbackCopy(text);
-      });
-    }
-  }
-
-  function showLoading(containerId, message = 'Memuat data...') {
-    const container = document.getElementById(containerId);
-    if (container) {
-      container.innerHTML = `
-      <div class="loading-container">
-      <div class="spinner-border loading-spinner" role="status">
-      <span class="visually-hidden">Loading...</span>
-      </div>
-      <div>${message}</div>
-      </div>
-      `;
-    }
-  }
-
-  async function fetchWithAuth(url) {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-    const res = await fetch(url, {
-      headers
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
+  // ================== GUNAKAN FUNGSI GLOBAL DARI LAYOUT ==================
+  const {
+    fetchWithAuth,
+    showToast,
+    copyToClipboard,
+    showLoading,
+    hideLoading,
+    escapeHtml
+  } = window.TelegramApp;
 
   // Data
   let categories = [];
@@ -156,16 +85,25 @@
     let html = '';
     filtered.forEach(cat => {
     html += `
-    <div class="category-item" onclick="showContents('${cat.id}', '${cat.code}')">
+    <div class="category-item" data-id="${cat.id}" data-code="${escapeHtml(cat.code)}">
     <div>
-    <div class="category-name">${cat.name}</div>
-    <div class="category-code">${cat.code}</div>
+    <div class="category-name">${escapeHtml(cat.name)}</div>
+    <div class="category-code">${escapeHtml(cat.code)}</div>
     </div>
-    <i class="bi bi-chevron-right" style="color: var(--tg-theme-hint-color, #999);"></i>
+    <i class="bi bi-chevron-right"></i>
     </div>
     `;
     });
     container.innerHTML = html;
+
+    // Attach event listeners
+    document.querySelectorAll('.category-item').forEach(el => {
+    el.addEventListener('click', () => {
+    const id = el.dataset.id;
+    const code = el.dataset.code;
+    showContents(id, code);
+    });
+    });
   }
 
   async function showContents(id, code) {
@@ -176,14 +114,15 @@
     document.getElementById('back-to-categories').style.display = 'block';
     document.getElementById('contents-container').style.display = 'block';
 
-    showLoading('contents-container', 'Memuat contents...');
-
+    showLoading('Memuat contents...');
     try {
       const data = await fetchWithAuth(`{{ config("app.url") }}/api/data-object/categories/${id}/contents`);
       renderContents(data);
-    } catch(err) {
+    } catch (err) {
       document.getElementById('contents-container').innerHTML = `<div class="loading">Gagal memuat konten: ${err.message}</div>`;
-      showToast('Gagal memuat konten: ' + error.message, 'danger');
+      showToast('Gagal memuat konten: ' + err.message);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -197,13 +136,23 @@
     let html = '';
     contents.forEach(item => {
     html += `
-    <div class="content-item" onclick="copyToClipboard('${item.code}')">
-    <div class="content-code">${item.code}</div>
-    <div class="content-desc">${item.description}</div>
+    <div class="content-item" data-code="${escapeHtml(item.code)}">
+    <div>
+    <div class="content-code">${escapeHtml(item.code)}</div>
+    <div class="content-desc">${escapeHtml(item.description)}</div>
+    </div>
+    <i class="bi bi-copy"></i>
     </div>
     `;
     });
     container.innerHTML = html;
+
+    document.querySelectorAll('.content-item').forEach(el => {
+    el.addEventListener('click', () => {
+    const code = el.dataset.code;
+    copyToClipboard(code);
+    });
+    });
   }
 
   function showCategories() {
@@ -212,6 +161,7 @@
     document.getElementById('contents-container').style.display = 'none';
     renderCategories(categories);
   }
+
   // ================== TASKS ==================
   function renderTasks(taskList) {
     const container = document.getElementById('tasks-container');
@@ -233,18 +183,28 @@
     let html = '';
     filtered.forEach(task => {
     html += `
-    <div class="task-item" onclick="copyToClipboard('${task.code}')">
-    <div class="task-desc">${task.description}</div>
-    <div class="task-code">${task.code}</div>
+    <div class="task-item" data-code="${escapeHtml(task.code)}">
+    <div>
+    <div class="task-desc">${escapeHtml(task.description)}</div>
+    <div class="task-code">${escapeHtml(task.code)}</div>
+    </div>
+    <i class="bi bi-copy"></i>
     </div>
     `;
     });
     container.innerHTML = html;
+
+    document.querySelectorAll('.task-item').forEach(el => {
+    el.addEventListener('click', () => {
+    const code = el.dataset.code;
+    copyToClipboard(code);
+    });
+    });
   }
 
+  // ================== LOAD DATA ==================
   async function loadData() {
-    showLoading('categories-container', 'Memuat object codes...');
-    showLoading('tasks-container', 'Memuat task codes...');
+    showLoading('Memuat data...');
     try {
       const [cats,
         tsk] = await Promise.all([
@@ -257,24 +217,48 @@
       document.getElementById('task-count-badge').textContent = tasks.length;
       renderCategories(categories);
       renderTasks(tasks);
-    } catch(err) {
+    } catch (err) {
       console.error(err);
       document.getElementById('categories-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
       document.getElementById('tasks-container').innerHTML = `<div class="loading">Gagal memuat data: ${err.message}</div>`;
+      showToast('Gagal memuat data: ' + err.message);
+    } finally {
+      hideLoading();
     }
   }
 
-  loadData();
-
+  // ================== EVENT LISTENERS ==================
   document.getElementById('object-search').addEventListener('input', function() {
   if (document.getElementById('categories-container').style.display !== 'none') {
   renderCategories(categories);
   }
   });
-
   document.getElementById('task-search').addEventListener('input', function() {
   renderTasks(tasks);
   });
+  document.getElementById('back-to-categories').addEventListener('click', showCategories);
+
+  // Inisialisasi Bootstrap tabs (fallback jika tidak ada bootstrap JS)
+  if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+    const triggerTabList = [].slice.call(document.querySelectorAll('#dataTab button'));
+    triggerTabList.forEach(triggerEl => {
+    new bootstrap.Tab(triggerEl);
+    });
+  } else {
+    document.querySelectorAll('#dataTab button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('data-bs-target');
+    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+    document.querySelector(targetId).classList.add('show', 'active');
+    document.querySelectorAll('#dataTab button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    });
+    });
+  }
+
+  // Mulai
+  loadData();
 </script>
 @endpush
 
@@ -377,36 +361,6 @@
     .search-box::placeholder {
     color: var(--tg-theme-hint-color, #999);
     }
-    .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    }
-    .page-header h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--tg-theme-text-color, #000);
-    }
-    .home-button {
-    background: none;
-    border: none;
-    color: var(--tg-theme-button-color, #40a7e3);
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    }
-    .home-button:hover {
-    opacity: 0.8;
-    }
-    .home-button i {
-    font-size: 2.5rem;
-    }
     #back-to-categories {
     display: none;
     margin-bottom: 20px;
@@ -422,31 +376,15 @@
     background-color: var(--tg-theme-button-color, #40a7e3) !important;
     color: var(--tg-theme-button-text-color, #fff) !important;
     }
-    .tab-pane {
-    padding: 0;
-    }
-    .main-container {
-    background-color: var(--tg-theme-bg-color, #fff);
-    min-height: 100vh;
-    }
     .container-custom {
     max-width: 500px;
     margin: 0 auto;
     padding: 1rem;
     }
-    .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
+    .loading {
+    text-align: center;
+    padding: 40px;
     color: var(--tg-theme-hint-color, #999);
-    }
-    .loading-spinner {
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: 1rem;
-    color: var(--tg-theme-button-color, #40a7e3);
     }
     </style>
     @endpush
